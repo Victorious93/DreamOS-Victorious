@@ -128,3 +128,44 @@ class ProfileTests(unittest.TestCase):
             p.write_text("x" * (1024 * 1024 + 1))
             with self.assertRaises(ProfileError):
                 load_profile(p)
+
+
+def vmos_profile(api=25, arch="arm64-v8a"):
+    return {"schema": 1, "name": "VMOS Pro Guest", "target": "virtual", "codename": "vmos_pro_712",
+            "manufacturer": "VMOS", "model": "VMOS Pro ROM", "arch": arch, "android_api": api,
+            "source_paths": {"device": "device/vmos/pro", "kernel": "", "vendor": ""},
+            "security": {"selinux": "enforcing", "verified_boot": "preserve", "root": "none", "xposed": "none",
+                         "location_testing": "disabled"},
+            "virtualization_targets": ["vmos"]}
+
+
+class VmosProfileTests(unittest.TestCase):
+    def test_vmos_apis_accepted(self):
+        for api in (22, 25, 28):
+            with self.subTest(api=api):
+                self.assertEqual(validate_profile(vmos_profile(api))["android_api"], api)
+
+    def test_legacy_api_rejected_for_physical(self):
+        for api in (22, 25, 27, 21):
+            d = physical_profile()
+            d["android_api"] = api
+            with self.subTest(api=api), self.assertRaises(ProfileError):
+                validate_profile(d)
+
+    def test_legacy_api_rejected_outside_vmos(self):
+        for vt in (["vphone"], ["vmos", "vphone"], []):
+            d = vmos_profile(22)
+            d["virtualization_targets"] = vt
+            with self.subTest(vt=vt), self.assertRaises(ProfileError):
+                validate_profile(d)
+        for api in (21, 23, 24, 26, 27):
+            with self.subTest(api=api), self.assertRaises(ProfileError):
+                validate_profile(vmos_profile(api))
+
+    def test_vmos_requires_arm_and_security_baseline(self):
+        with self.assertRaises(ProfileError):
+            validate_profile(vmos_profile(arch="x86_64"))
+        d = vmos_profile()
+        d["security"]["selinux"] = "permissive"
+        with self.assertRaises(ProfileError):
+            validate_profile(d)

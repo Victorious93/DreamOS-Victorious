@@ -9,6 +9,9 @@ CODENAME = re.compile(r"^[a-z0-9][a-z0-9_-]{1,63}$")
 SUPPORTED_ARCHES = frozenset({"arm64-v8a", "armeabi-v7a", "x86_64", "x86"})
 SUPPORTED_TARGETS = frozenset({"physical", "virtual"})
 SUPPORTED_VIRTUALIZATION = frozenset({"vmos", "vphone"})
+# VMOS Pro guest ROMs: Android 5.1.1 (API 22), 7.1.2 (API 25), 9 (API 28). [Likely, community sources]
+VMOS_LEGACY_APIS = frozenset({22, 25})
+VMOS_ARCHES = frozenset({"arm64-v8a", "armeabi-v7a"})
 REQUIRED = {"schema", "name", "target", "codename", "manufacturer", "model", "arch", "android_api", "source_paths", "security", "virtualization_targets"}
 SOURCE_PATH_FIELDS = {"device", "kernel", "vendor"}
 SECURITY_FIELDS = {"selinux", "verified_boot", "root", "xposed", "location_testing"}
@@ -49,8 +52,8 @@ def validate_profile(data: object) -> dict:
         raise ProfileError("replace the template codename with a verified target")
     if not isinstance(data["arch"], str) or data["arch"] not in SUPPORTED_ARCHES:
         raise ProfileError("unsupported Android architecture")
-    if type(data["android_api"]) is not int or not 28 <= data["android_api"] <= 99:
-        raise ProfileError("android_api must be an integer between 28 and 99")
+    if type(data["android_api"]) is not int or not (28 <= data["android_api"] <= 99 or data["android_api"] in VMOS_LEGACY_APIS):
+        raise ProfileError("android_api must be an integer between 28 and 99 (22/25 only for VMOS Pro virtual profiles)")
     paths = data["source_paths"]
     if not isinstance(paths, dict) or set(paths) != SOURCE_PATH_FIELDS:
         raise ProfileError("source_paths must contain device, kernel, vendor")
@@ -78,6 +81,10 @@ def validate_profile(data: object) -> dict:
         raise ProfileError("virtualization_targets must be a unique list of vmos/vphone")
     if data["target"] == "physical" and vt:
         raise ProfileError("physical profile cannot simultaneously claim virtual targets; use separate profiles")
+    if data["android_api"] in VMOS_LEGACY_APIS and not (data["target"] == "virtual" and vt == ["vmos"]):
+        raise ProfileError("android_api 22/25 is only allowed for virtual profiles targeting exactly ['vmos'] (VMOS Pro 5.1.1/7.1.2 guests)")
+    if "vmos" in vt and data["arch"] not in VMOS_ARCHES:
+        raise ProfileError("VMOS Pro guests are ARM only (armeabi-v7a or arm64-v8a)")
     return data
 
 

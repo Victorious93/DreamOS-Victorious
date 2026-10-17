@@ -59,3 +59,5 @@ Revised order (all "planned" unless marked):
 - **V3 – Source path (optional):** build vmos-dev/open-vmos-aosp_5.1 (Android 5.1, ~50 GB source + ~100 GB output) — does NOT fit this box (75 GB free, 16 GB RAM). Needs a bigger builder. Non-commercial license only.
 - **V4 – VMOS Cloud track (optional):** CloudROM-13/14 source needs collaborator access from VMOS support; publish via their platform. VMOS Edge imports only signed official images (custom not possible).
 - **V5 – Releases:** only after a confirmed import + boot on a named VMOS version. Proprietary base ROMs are not redistributed; ship an overlay + instructions instead.
+
+- 2026-10-17: V1 host tools implemented on branch feature/vmos-pro-v1 (synthetic tests only). Next: V2 needs Don's VMOS Pro backup zip + an on-device import test.
