@@ -43,3 +43,8 @@ Each phase has an explicit exit gate. "Planned" means *not implemented*.
 
 - CI for real OS builds; artifact verification, SBOM, dependency/vulnerability review, signing from secure runners.
 - Compatibility matrix, reproducibility reports, upgrade/rollback tests, documentation and publication.
+
+## Status check — 2026-10-17
+- Phase 1: host tooling verified (43 unit tests pass). Added host diagnostics, SHA256SUMS verification, lint+test CI.
+- Phase 2 is **blocked**: (a) no target device/virtual product chosen; (b) current dev box has ~75 GB free disk and 15.6 GB RAM vs ≥300 GB / ≥32 GB needed; (c) `repo` not installed; (d) GitHub repo Victorious93/DreamOS-Victorious not found/accessible.
+- No ROM, image or boot test exists.
