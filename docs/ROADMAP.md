@@ -48,3 +48,14 @@ Each phase has an explicit exit gate. "Planned" means *not implemented*.
 - Phase 1: host tooling verified (43 unit tests pass). Added host diagnostics, SHA256SUMS verification, lint+test CI.
 - Phase 2 is **blocked**: (a) no target device/virtual product chosen; (b) current dev box has ~75 GB free disk and 15.6 GB RAM vs ≥300 GB / ≥32 GB needed; (c) `repo` not installed; (d) GitHub repo Victorious93/DreamOS-Victorious not found/accessible.
 - No ROM, image or boot test exists.
+
+## Retarget — 2026-10-17: VMOS is the PRIMARY target
+Don confirmed DreamOS Victorious is a custom ROM for the VMOS app (virtual Android), not a phone ROM. Physical-device work (old Phase 4) is deferred indefinitely.
+
+Revised order (all "planned" unless marked):
+- **V0 – Pin the target [BLOCKED on Don]:** exact product (VMOS Pro app vs VMOS Cloud vs VMOS Edge), app version, host phone ABI, guest Android version.
+- **V1 – Host tooling for VMOS packages [can start now on this box]:** inspect/validate a VMOS ROM zip layout (zip-in-zip/7z, no spaces in names), file inventory + SHA-256, diff two ROM trees, overlay builder that adds DreamOS files (build.prop lines, apps, theme) to an unpacked tree and repacks; extend profile schema (`vmos_product`, `vmos_app_version`, allow API 22/25/28+).
+- **V2 – Mod path (VMOS Pro):** start from Don's own backup of an installed ROM (System backup -> /storage/emulated/0/vmospro/backup), apply DreamOS overlay, repack, import via "Import local ROM", record boot evidence. Fits this box (ROM ~0.5-2 GB).
+- **V3 – Source path (optional):** build vmos-dev/open-vmos-aosp_5.1 (Android 5.1, ~50 GB source + ~100 GB output) — does NOT fit this box (75 GB free, 16 GB RAM). Needs a bigger builder. Non-commercial license only.
+- **V4 – VMOS Cloud track (optional):** CloudROM-13/14 source needs collaborator access from VMOS support; publish via their platform. VMOS Edge imports only signed official images (custom not possible).
+- **V5 – Releases:** only after a confirmed import + boot on a named VMOS version. Proprietary base ROMs are not redistributed; ship an overlay + instructions instead.
