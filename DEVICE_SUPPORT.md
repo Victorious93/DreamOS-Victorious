@@ -10,5 +10,5 @@
 | Physical phones | — | — | — | Deferred |
 
 Profiles: profiles/virtual-template.json (rejected by design until filled with a verified VMOS product/version).
-Known gap: the validator currently requires android_api >= 28, which rejects VMOS Pro 5.1 (API 22) and 7.1.2 (API 25) ROMs; to be fixed in Phase V1.
+Profile validation (dreamos/profile.py): android_api must be 28-99, except that API 22 and 25 (VMOS Pro 5.1.1 / 7.1.2 guests) are accepted only for virtual profiles whose virtualization_targets is exactly ["vmos"]. Any profile targeting VMOS must use an ARM arch (armeabi-v7a or arm64-v8a).
 Blocking input from Don (product = VMOS Pro, confirmed): app version, host phone model/ABI, and which guest Android version he uses.
