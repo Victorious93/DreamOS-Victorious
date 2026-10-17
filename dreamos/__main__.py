@@ -8,6 +8,8 @@ import sys
 
 from . import __version__
 from .bundle import BundleError, build_bundle, verify_bundle
+from .checksum import ChecksumError, verify_sums, write_sums
+from .envcheck import assess, collect
 from .profile import ProfileError, load_profile
 
 
@@ -23,6 +25,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", required=True)
     p = sub.add_parser("verify", help="verify a DreamOS source ZIP and hashes")
     p.add_argument("bundle")
+    p = sub.add_parser("env", help="read-only host diagnostics vs AOSP build requirements")
+    p.add_argument("--path", default=".", help="filesystem to measure free space on")
+    p.add_argument("--strict", action="store_true", help="exit 1 if host is not AOSP-build ready")
+    p = sub.add_parser("sha256", help="create or verify sha256sum-format checksum files")
+    p.add_argument("action", choices=["verify", "create"])
+    p.add_argument("sums_file", help="SHA256SUMS file (verify) or output path (create)")
+    p.add_argument("files", nargs="*", help="artifacts to hash (create only)")
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
@@ -36,7 +45,24 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "verify":
             manifest = verify_bundle(args.bundle)
             print(f"VERIFIED: source-only bundle for {manifest['device_codename']}, {len(manifest['contents'])} files")
-    except (ProfileError, BundleError, OSError) as exc:
+        elif args.command == "env":
+            info = collect(args.path)
+            report = {"host": info, "assessment": assess(info)}
+            print(json.dumps(report, indent=2))
+            if args.strict and not report["assessment"]["aosp_build_ready"]:
+                return 1
+        elif args.command == "sha256":
+            if args.action == "verify":
+                names = verify_sums(args.sums_file)
+                print(f"SHA256 OK: {len(names)} artifacts")
+            else:
+                if not args.files:
+                    raise ChecksumError("create needs at least one file")
+                from pathlib import Path
+                out = Path(args.sums_file)
+                out.write_text(write_sums(args.files, out.parent), encoding="utf-8")
+                print(f"WROTE: {out}")
+    except (ProfileError, BundleError, ChecksumError, OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0

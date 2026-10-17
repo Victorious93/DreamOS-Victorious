@@ -1,0 +1,31 @@
+name: Lint and unit tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install lint tools
+        run: |
+          python -m pip install --upgrade pip ruff
+          sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Ruff (pyflakes + errors)
+        run: ruff check --select E9,F dreamos tests
+      - name: ShellCheck
+        run: shellcheck scripts/*.sh
+      - name: Unit tests
+        run: bash scripts/test.sh
+      - name: Profile templates still rejected
+        run: bash scripts/validate-profiles.sh
+      - name: Host diagnostics (informational, never fails)
+        run: python -m dreamos env
