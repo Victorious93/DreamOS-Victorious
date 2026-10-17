@@ -2,7 +2,7 @@
 
 ## Host tests (exist and pass) [Certain]
 ```bash
-bash scripts/test.sh                     # compileall + unittest (43 tests as of 0.2.0-dev)
+bash scripts/test.sh                     # compileall + unittest (59 tests on feature/vmos-pro-v1)
 ruff check --select E9,F dreamos tests   # lint
 bash scripts/validate-profiles.sh        # templates must be rejected; real profiles must pass
 shellcheck scripts/*.sh                  # in CI (not installed on the dev box)
@@ -11,4 +11,5 @@ Coverage: profile validation (tests/test_profile.py), bundle build/verify and ta
 
 ## Tests that do NOT exist [Certain]
 - No AOSP/Lineage compile test, no image build, no emulator or device boot test, no instrumentation tests, no VMOS/vPhone import test.
+- **No VMOS Pro import test**: no repacked ROM has ever been imported into VMOS Pro; whether Linux-made repacks import is unknown (community reports say non-phone zipping caused failures).
 - `collect-device-info.sh` has never been run against a real phone.

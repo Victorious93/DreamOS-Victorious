@@ -5,11 +5,13 @@ import argparse
 import json
 import shutil
 import sys
+import zipfile
 
 from . import __version__
 from .bundle import BundleError, build_bundle, verify_bundle
 from .checksum import ChecksumError, verify_sums, write_sums
 from .envcheck import assess, collect
+from .vmos import VmosError, apply_overlay, check_rom, diff_roms, list_rom
 from .profile import ProfileError, load_profile
 
 
@@ -32,6 +34,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("action", choices=["verify", "create"])
     p.add_argument("sums_file", help="SHA256SUMS file (verify) or output path (create)")
     p.add_argument("files", nargs="*", help="artifacts to hash (create only)")
+    v = sub.add_parser("vmos", help="VMOS Pro ROM zip tools (host-only; never imports or flashes)")
+    vs = v.add_subparsers(dest="vmos_cmd", required=True)
+    p = vs.add_parser("check", help="check VMOS Pro ROM zip layout/naming")
+    p.add_argument("rom")
+    p = vs.add_parser("list", help="list ROM files with SHA-256 (JSON)")
+    p.add_argument("rom")
+    p = vs.add_parser("diff", help="diff two ROMs (zip or unpacked directory)")
+    p.add_argument("a")
+    p.add_argument("b")
+    p = vs.add_parser("apply", help="apply a DreamOS overlay directory and repack")
+    p.add_argument("rom")
+    p.add_argument("overlay")
+    p.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
@@ -51,6 +66,18 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(report, indent=2))
             if args.strict and not report["assessment"]["aosp_build_ready"]:
                 return 1
+        elif args.command == "vmos":
+            if args.vmos_cmd == "check":
+                report = check_rom(args.rom).as_dict()
+                print(json.dumps(report, indent=2))
+                return 0 if report["ok"] else 1
+            if args.vmos_cmd == "list":
+                print(json.dumps(list_rom(args.rom), indent=2, sort_keys=True))
+            elif args.vmos_cmd == "diff":
+                print(json.dumps(diff_roms(args.a, args.b), indent=2))
+            else:
+                out = apply_overlay(args.rom, args.overlay, args.out)
+                print(f"CREATED: {out} [UNTESTED in VMOS Pro until imported on a device]")
         elif args.command == "sha256":
             if args.action == "verify":
                 names = verify_sums(args.sums_file)
@@ -62,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
                 out = Path(args.sums_file)
                 out.write_text(write_sums(args.files, out.parent), encoding="utf-8")
                 print(f"WROTE: {out}")
-    except (ProfileError, BundleError, ChecksumError, OSError, ValueError) as exc:
+    except (ProfileError, BundleError, ChecksumError, VmosError, OSError, ValueError, zipfile.BadZipFile) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0

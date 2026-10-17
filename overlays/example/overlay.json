@@ -1,0 +1,5 @@
+{
+  "schema": 1,
+  "build_prop": {"set": {"ro.dreamos.edition": "Foundation", "ro.dreamos.version": "0.2.0-dev"}, "remove": []},
+  "files": [{"src": "edition.conf", "dest": "system/etc/dreamos/edition.conf", "mode": "0644"}]
+}
