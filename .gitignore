@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.zip
+build/
+out/
+*.img
+*.bin
+*.apk
+*.keystore
+*.key
+*.pem
+*.jks
+local.properties

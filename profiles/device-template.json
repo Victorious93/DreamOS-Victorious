@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Replace With Verified Device Name",
+  "target": "physical",
+  "codename": "replace_me",
+  "manufacturer": "Replace With Manufacturer",
+  "model": "Replace With Model",
+  "arch": "arm64-v8a",
+  "android_api": 35,
+  "source_paths": {
+    "device": "device/yourvendor/yourdevice",
+    "kernel": "kernel/yourvendor/yourdevice",
+    "vendor": "vendor/yourvendor/yourdevice"
+  },
+  "security": {
+    "selinux": "enforcing",
+    "verified_boot": "preserve",
+    "root": "external_opt_in",
+    "xposed": "external_opt_in",
+    "location_testing": "disabled"
+  },
+  "virtualization_targets": []
+}

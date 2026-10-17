@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Replace With Supported Virtual Android Device",
+  "target": "virtual",
+  "codename": "replace_me",
+  "manufacturer": "Replace With Platform Vendor",
+  "model": "Replace With Virtual Model",
+  "arch": "arm64-v8a",
+  "android_api": 35,
+  "source_paths": {
+    "device": "device/verified/virtual-target",
+    "kernel": "",
+    "vendor": ""
+  },
+  "security": {
+    "selinux": "enforcing",
+    "verified_boot": "preserve",
+    "root": "none",
+    "xposed": "none",
+    "location_testing": "android_mock_location"
+  },
+  "virtualization_targets": ["vmos", "vphone"]
+}
